@@ -10,6 +10,7 @@
   "author": "Muhammad Ali",
   "license": "ISC",
   "dependencies": {
+    "express": "^4.17.1",
     "mongoose": "5.1.7"
   }
 }
