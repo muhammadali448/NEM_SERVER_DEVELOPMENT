@@ -4,6 +4,8 @@ var path = require("path");
 var session = require("express-session");
 var FileStore = require("session-file-store")(session);
 // var cookieParser = require("cookie-parser");
+var passport = require("passport");
+var authenticate = require("./authenticate");
 var logger = require("morgan");
 const mongoose = require("mongoose");
 var indexRouter = require("./routes/index");
@@ -41,33 +43,26 @@ app.use(
     store: new FileStore()
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 function auth(req, res, next) {
-  console.log(req.session);
-
-  if (!req.session.user) {
+  console.log(req.user);
+  if (!req.user) {
     var err = new Error("You are not authenticated!");
     err.status = 403;
-    return next(err);
+    next(err);
   } else {
-    if (req.session.user === "authenticated") {
-      next();
-    } else {
-      var err = new Error("You are not authenticated!");
-      err.status = 403;
-      return next(err);
-    }
+    next();
   }
 }
 // app.use(cookieParser("12345-67890-09876-54321"));
+app.use(auth);
 app.use(express.static(path.join(__dirname, "public")));
-
 app.use("/dishes", dishRouter);
 app.use("/promotions", promoRouter);
 app.use("/leaders", leaderRouter);
-
-app.use(auth);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
