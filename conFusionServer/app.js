@@ -3,7 +3,7 @@ var express = require("express");
 var path = require("path");
 var passport = require("passport");
 var authenticate = require("./authenticate");
-var config = require('./config');
+var config = require("./config");
 var logger = require("morgan");
 const mongoose = require("mongoose");
 var indexRouter = require("./routes/index");
@@ -12,6 +12,16 @@ var dishRouter = require("./routes/dishRouter");
 var promoRouter = require("./routes/promoRouter");
 var leaderRouter = require("./routes/leaderRouter");
 var app = express();
+app.all("*", (req, res, next) => {
+  if (req.secure) {
+    return next();
+  } else {
+    res.redirect(
+      307,
+      "https://" + req.hostname + ":" + app.get("secPort") + req.url
+    );
+  }
+});
 const url = config.mongoUrl;
 const connect = mongoose.connect(url);
 
@@ -32,6 +42,7 @@ app.use(logger("dev"));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(passport.initialize());
+// Secure traffic only
 app.use("/", indexRouter);
 app.use("/users", usersRouter);
 app.use(express.static(path.join(__dirname, "public")));
