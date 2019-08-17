@@ -111,9 +111,16 @@ favoriteRouter
                 err => next(err)
               );
             } else {
-              res.statusCode = 200;
-              res.setHeader("Content-Type", "application/json");
-              res.json(favorite);
+              var favorite = new Favorites({
+                user: req.user._id,
+                dishes: [req.params.dishId]
+              })
+              favorite.save()
+              .then((favorite) => {
+                  res.statusCode = 200;
+                  res.setHeader('Content-Type', 'application/json');
+                  res.json(favorite);
+              }, (err) => next(err))
             }
           } else {
             err = new Error("Dish " + req.params.dishId + " not found");
